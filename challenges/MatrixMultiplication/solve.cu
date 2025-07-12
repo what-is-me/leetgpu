@@ -29,12 +29,12 @@ __global__ void matrix_multiplication_kernel(const float* A, const float* B,
   for (int i = 0; i < N; i += 16) {
     __syncthreads();
     a_buf[dy][dx] = MAT_AT_DEFAULT0(A, y, i + dx, M, N);
-    b_buf[dx][dy] = MAT_AT_DEFAULT0(B, i + dy, x, N, K);
+    b_buf[dy][dx] = MAT_AT_DEFAULT0(B, i + dy, x, N, K);
     __syncthreads();
 
 #pragma unroll
     for (int j = 0; j < 16; ++j) {
-      c_cell += a_buf[dy][j] * b_buf[dx][j];
+      c_cell += a_buf[dy][j] * b_buf[j][dx];
     }
   }
   if (y < M && x < K) {
@@ -55,7 +55,6 @@ static
                                                                    N, K);
   cudaDeviceSynchronize();
 }
-
 
 #include "cuda_common.cuh"
 std::vector<float> MatrixMultiplication(const std::vector<float>& A,
